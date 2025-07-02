@@ -188,7 +188,7 @@ ebook_automation/
 - **Chapters**: 10-15 chapters
 - **Genres**: Paranormal Romance, Cozy Mystery
 - **Formats**: EPUB, PDF, MOBI
-- **Cover**: 1024x1536 pixels, AI-generated with text overlay
+- **Cover**: 1024x1792 pixels, AI-generated with text overlay
 
 ### Content Quality
 - **Professional Structure**: Proper pacing, character development, conflict resolution

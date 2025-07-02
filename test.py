@@ -193,9 +193,13 @@ class BookBuilder:
                 genre=genre
             )
             
+            logger.info(f"image_prompt: {image_prompt}")
+
             # Generate cover image
             cover_filename = f"cover_{book_title.replace(' ', '_').replace(':', '').replace('?', '').replace('!', '')}.png"
             cover_path = os.path.join(Config.COVERS_DIR, cover_filename)
+
+            logger.info(f"cover_path: {cover_path}")
             
             cover_path = self.ai_generator.generate_cover_image(image_prompt, cover_path)
             
@@ -218,7 +222,7 @@ class BookBuilder:
             
             with open(details_file_path, 'w', encoding='utf-8') as f:
                 f.write("="*80 + "\n")
-                f.write("📚 BOOK DETAILS\n")
+                f.write("BOOK DETAILS\n")
                 f.write("="*80 + "\n")
                 f.write(f"Title: {book_title}\n")
                 f.write(f"Genre: {genre}\n")
@@ -254,34 +258,16 @@ class BookBuilder:
             book_output_dir = os.path.join(Config.BOOKS_DIR, book_title)
             
             # Create all formats
-            book_files = self.book_formatter.create_all_formats(book_data, book_output_dir)
+            book_files = self.book_formatter.create_all_formats(book_data, book_output_dir, cover_path)
             
             creation_time = time.time() - start_time
             logger.info(f"Created book files: {list(book_files.keys())}")
             logger.info(f"Creation time: {creation_time:.2f} seconds")
             
-            # Save book formats info to file
-            book_title_clean = book_data['title'].replace(' ', '_').replace(':', '').replace('?', '').replace('!', '')
-            formats_file_path = os.path.join(Config.OUTPUT_DIR, f"{book_title_clean}_book_formats.txt")
-            
-            with open(formats_file_path, 'w', encoding='utf-8') as f:
-                f.write("="*80 + "\n")
-                f.write("📄 BOOK FORMATS CREATED\n")
-                f.write("="*80 + "\n")
-                f.write(f"Book Title: {book_data['title']}\n")
-                f.write(f"Author: {book_data['author']}\n")
-                f.write(f"Output Directory: {book_output_dir}\n")
-                f.write("\nFormats:\n")
-                for format_name, file_path in book_files.items():
-                    f.write(f"  • {format_name.upper()}: {file_path}\n")
-                f.write("="*80 + "\n")
-            
-            logger.info(f"Book formats info saved to: {formats_file_path}")
-            
             return book_files
             
         except Exception as e:
-            logger.error(f"Error formatting book files: {e}")
+            logger.error(e)
             raise
     
     def upload_to_google_drive(self, book_title: str, book_files: Dict, cover_path: str) -> Optional[Dict]:
@@ -382,6 +368,21 @@ class BookBuilder:
                 book_title=outline['title'],
                 genre=concept['niche'],
                 concept_summary=concept['concept_summary']
+            )
+
+            # Step 5: Generate cover image
+            cover_path = self.generate_cover_image(
+                book_title=outline['title'],
+                genre=concept['niche']
+            )
+
+            # Step 6: Format book files
+            book_files = self.format_book_files(
+                concept=concept,
+                outline=outline,
+                chapters=chapters,
+                back_cover_blurb=back_cover_blurb,
+                cover_path=cover_path
             )
             
             # Calculate total time

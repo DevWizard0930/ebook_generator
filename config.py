@@ -39,7 +39,7 @@ class Config:
     
     # Cover Image Settings
     COVER_WIDTH = 1024
-    COVER_HEIGHT = 1536
+    COVER_HEIGHT = 1792
     
     # Supported Genres
     SUPPORTED_GENRES = ["Paranormal Romance", "Cozy Mystery"]

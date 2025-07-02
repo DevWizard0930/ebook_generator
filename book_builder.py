@@ -196,7 +196,6 @@ class BookBuilder:
             # Generate cover image
             cover_filename = f"cover_{book_title.replace(' ', '_').replace(':', '').replace('?', '').replace('!', '')}.png"
             cover_path = os.path.join(Config.COVERS_DIR, cover_filename)
-            
             cover_path = self.ai_generator.generate_cover_image(image_prompt, cover_path)
             
             # Add text overlay
@@ -254,34 +253,16 @@ class BookBuilder:
             book_output_dir = os.path.join(Config.BOOKS_DIR, book_title)
             
             # Create all formats
-            book_files = self.book_formatter.create_all_formats(book_data, book_output_dir)
+            book_files = self.book_formatter.create_all_formats(book_data, book_output_dir, cover_path)
             
             creation_time = time.time() - start_time
             logger.info(f"Created book files: {list(book_files.keys())}")
             logger.info(f"Creation time: {creation_time:.2f} seconds")
             
-            # Save book formats info to file
-            book_title_clean = book_data['title'].replace(' ', '_').replace(':', '').replace('?', '').replace('!', '')
-            formats_file_path = os.path.join(Config.OUTPUT_DIR, f"{book_title_clean}_book_formats.txt")
-            
-            with open(formats_file_path, 'w', encoding='utf-8') as f:
-                f.write("="*80 + "\n")
-                f.write("📄 BOOK FORMATS CREATED\n")
-                f.write("="*80 + "\n")
-                f.write(f"Book Title: {book_data['title']}\n")
-                f.write(f"Author: {book_data['author']}\n")
-                f.write(f"Output Directory: {book_output_dir}\n")
-                f.write("\nFormats:\n")
-                for format_name, file_path in book_files.items():
-                    f.write(f"  • {format_name.upper()}: {file_path}\n")
-                f.write("="*80 + "\n")
-            
-            logger.info(f"Book formats info saved to: {formats_file_path}")
-            
             return book_files
             
         except Exception as e:
-            logger.error(f"Error formatting book files: {e}")
+            logger.error(e)
             raise
     
     def upload_to_google_drive(self, book_title: str, book_files: Dict, cover_path: str) -> Optional[Dict]:
@@ -554,30 +535,30 @@ def main():
         result = builder.build_book(genre=args.genre, title=args.title)
         
         if result['success']:
-            print(f"\n✅ Book successfully created: {result['book_title']}")
-            print(f"📚 Genre: {result['genre']}")
-            print(f"📝 Word Count: {result['word_count']}")
-            print(f"⏱️  Total Time: {result['total_time']:.2f} seconds")
-            print(f"📁 Files: {list(result['files'].keys())}")
+            print(f"\n Book successfully created: {result['book_title']}")
+            print(f"Genre: {result['genre']}")
+            print(f"Word Count: {result['word_count']}")
+            print(f"Total Time: {result['total_time']:.2f} seconds")
+            print(f"Files: {list(result['files'].keys())}")
             
             if result['upload_info']:
-                print(f"☁️  Google Drive: Uploaded successfully")
+                print(f"Google Drive: Uploaded successfully")
             
             if result['publishing_info'].get('success'):
-                print(f"📖 StreetLib: Published successfully")
+                print(f"StreetLib: Published successfully")
             else:
-                print(f"❌ StreetLib: Failed - {result['publishing_info'].get('error', 'Unknown error')}")
+                print(f"StreetLib: Failed - {result['publishing_info'].get('error', 'Unknown error')}")
             
             if result['airtable_record_id']:
-                print(f"📊 Airtable: Logged (Record ID: {result['airtable_record_id']})")
+                print(f"Airtable: Logged (Record ID: {result['airtable_record_id']})")
         else:
-            print(f"\n❌ Book creation failed: {result['error']}")
-            print(f"⏱️  Time spent: {result['total_time']:.2f} seconds")
+            print(f"\n Book creation failed: {result['error']}")
+            print(f"Time spent: {result['total_time']:.2f} seconds")
     
     except KeyboardInterrupt:
-        print("\n⚠️  Book creation interrupted by user")
+        print("\n Book creation interrupted by user")
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
+        print(f"\n Unexpected error: {e}")
         logger.error(f"Unexpected error in main: {e}")
 
 if __name__ == "__main__":
